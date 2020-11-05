@@ -8,13 +8,15 @@
     "test": "jest"
   },
   "dependencies": {
-    "express": "4.17.1",
+    "axios": "0.20.0",
     "body-parser": "1.19.0",
+    "express": "4.17.1",
     "express-fileupload": "1.2.0",
-    "streamifier": "0.1.1",
-    "node-fetch": "2.6.1",
+    "ipfilter": "0.0.4",
     "jest": "26.4.2",
-    "jsonwebtoken": "8.5.1"
+    "jsonwebtoken": "8.5.1",
+    "node-fetch": "2.6.1",
+    "streamifier": "0.1.1"
   },
   "author": "",
   "license": "ISC"

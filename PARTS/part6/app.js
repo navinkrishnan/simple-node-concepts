@@ -7,14 +7,16 @@ const proxy = httpProxy.createProxyServer();
 app.get("/", (req, res)=> {
     const {url} = req.query;
     console.log("Getting data from", url);
-    proxy.web(req, res, {target: url}, function(err){
+    proxy.web(req, res, {target: url, changeOrigin: false}, function(err){
         console.log("error", err);
         res.send(err).end();
         });
 });
 
 proxy.on('proxyRes', function(proxyRes, req, res) {
-    console.log("Response came", proxyRes);
+    // console.log("Response came", proxyRes);
+    console.log(req.originalUrl);
+    res.location("http://localhost:4004" + req.url);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
 });

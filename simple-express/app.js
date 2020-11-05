@@ -7,6 +7,8 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const fetch = require("node-fetch");
 const router = require('./route');
+const axios = require("axios");
+const ipfilter = require("ipfilter");
 
 const app = express();
 
@@ -15,7 +17,12 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use("/ui", express.static("ui"));
 app.use(fileUpload());
 
-app.get("/", (_, res) => {
+const blcklist = ['127.0.0.1'];
+
+app.use("/", ipfilter(blcklist));
+
+app.get("/", (req, res) => {
+    console.log(req.connection.remoteAddress, req.ip, req.socket.remoteAddress);
     res.send("ok");
 });
 
@@ -58,6 +65,52 @@ function verifyToken(req, res, next){
         res.sendStatus(401);
     }
     
+}
+
+app.get("/remote", async (req, res)=> {
+    // var result = await fetch("http://localhost:3000/1").then(data => {
+    //     return {
+    //         status: data.status,
+    //         cdata: await data.text()
+    //     }
+    // })
+    // .catch(err=> {
+    //     console.log(err);
+    //     return {
+    //         status: err.status,
+    //         data: err.response
+    //     }
+    // });
+
+    var result1 = await axios("http://localhost:3000/1").catch(err=>{console.log("catch axios error", err); return err.response});
+    var result2 = await axios("http://localhost:3000/2").catch(err=>{console.log("catch axios error", err); return err.response});
+    var result3 = await axios("http://localhost:3000/3").catch(err=>{console.log("catch axios error", err); return err.response});
+    var result4 = await axios("http://localhost:3050/3").catch(err=>{console.log("catch axios error", err); return err.response});
+    
+    // result1 & 4
+    if(typeof result1 == "undefined" || typeof result4 == "undefined"){
+        res.sendStatus(500).end();
+    }
+    else if(result1.status != "200" || result3.status != "200"){
+        res.sendStatus(404).end()
+    }
+    else
+    res.send({status: result.status, data: result.data});
+});
+
+app.get("/delay", async (req, res)=> {
+    let canRespond = await oneSecond();
+    res.send("ok");
+});
+
+app.all("*", (_, res)=>{
+    res.sendStatus(404);
+})
+
+async function oneSecond(){
+    return new Promise((resolve)=> {
+        setTimeout(resolve, 5000);
+    })
 }
 
 const PORT = process.env.PORT || 4004;
